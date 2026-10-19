@@ -1,6 +1,6 @@
 from nicegui import ui
 
-from settings_store import load_settings, save_settings
+from store.settings_store import load_settings, save_settings
 
 
 def build_settings_tab():

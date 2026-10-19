@@ -4,10 +4,10 @@ import tempfile
 from pathlib import Path
 
 # The json file with the jurors
-JURY_FILE = Path(__file__).parent / "data" / "jury.json"
+JURY_FILE = Path(__file__).parent.parent / "data" / "jury.json"
 
 # The default jurors, used to reset the jury
-DEFAULT_JURY_FILE = Path(__file__).parent / "data" / "jury_default.json"
+DEFAULT_JURY_FILE = Path(__file__).parent.parent / "data" / "jury_default.json"
 
 
 def load_jury() -> list[dict]:

@@ -1,6 +1,6 @@
 from nicegui import ui
 
-from jury_store import load_jury, save_jury, reset_jury
+from store.jury_store import load_jury, save_jury, reset_jury
 
 
 # Make the card for one juror

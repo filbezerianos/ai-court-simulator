@@ -4,7 +4,7 @@ import tempfile
 from pathlib import Path
 
 # The json file with the current case, the cast and the transcript
-CASE_FILE = Path(__file__).parent / "data" / "current_case.json"
+CASE_FILE = Path(__file__).parent.parent / "data" / "current_case.json"
 
 
 # Returns None when there is no case yet (missing, empty or "{}" file)

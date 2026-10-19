@@ -1,4 +1,5 @@
 from nicegui import ui
+from pathlib import Path
 from tabs.court_tab import build_court_tab
 from tabs.jury_tab import build_jury_tab
 from tabs.settings_tab import build_settings_tab
@@ -7,8 +8,8 @@ from tabs.settings_tab import build_settings_tab
 # The title
 with ui.row().classes('w-full'):
     with ui.column().classes('w-full items-center text-center gap-0'):
-        ui.icon('gavel', size='md').classes('text-blue')
-        ui.markdown('### AI COURT SIMULATOR').classes('text-blue')
+        ui.icon('account_balance', size='md').classes('text-blue')
+        ui.markdown('### AI Court Simulator').classes('text-blue')
         ui.markdown('###### An AI-powered courtroom drama.')
 
 ui.separator()
@@ -41,5 +42,10 @@ dark.enable()
 
 ui.page_title("AI Court Simulator")
 
+with ui.footer(fixed=False).classes('bg-transparent justify-center'):
+    ui.label('Created by Fil Bezerianos.').classes('text-xs text-gray-500')
+    ui.link('GitHub', 'https://github.com/filbezerianos/ai-court-simulator', new_tab=True).classes('text-xs')
+
+
 # Run the app
-ui.run()
+ui.run(favicon=Path(__file__).parent / 'assets' / 'favicon.svg')

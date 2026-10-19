@@ -6,8 +6,8 @@ from string import Template
 from ollama import AsyncClient
 from pydantic import BaseModel
 
-from case_store import save_case
-from settings_store import load_settings
+from store.case_store import save_case
+from store.settings_store import load_settings
 
 ROOT = Path(__file__).parent.parent
 PROMPT_FILE = ROOT / "prompts" / "case_generate.md"

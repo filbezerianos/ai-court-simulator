@@ -3,7 +3,7 @@ import os
 import tempfile
 from pathlib import Path
 
-SETTINGS_FILE = Path(__file__).parent / "data" / "settings.json"
+SETTINGS_FILE = Path(__file__).parent.parent / "data" / "settings.json"
 
 DEFAULTS = {
     "user_name": "Alex Morgan",

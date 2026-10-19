@@ -1,7 +1,7 @@
 from nicegui import ui
 
 from ai.case_generator import generate_case
-from case_store import load_case, clear_case
+from store.case_store import load_case, clear_case
 
 
 async def new_case(button):
