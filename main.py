@@ -5,7 +5,15 @@ from tabs.jury_tab import build_jury_tab
 from tabs.settings_tab import build_settings_tab
 
 
-# The title
+# Enable dark mode
+dark = ui.dark_mode()
+dark.enable()
+
+# Set the title of the page
+ui.page_title("AI Court Simulator")
+
+
+# The title at the top
 with ui.row().classes('w-full'):
     with ui.column().classes('w-full items-center text-center gap-0'):
         ui.icon('account_balance', size='md').classes('text-blue')
@@ -14,14 +22,14 @@ with ui.row().classes('w-full'):
 
 ui.separator()
 
+# Define the tabs
 with ui.tabs().props('active-color=blue indicator-color=blue no-caps').classes('w-full') as tabs:
     one = ui.tab('one', label='Courtroom', icon='gavel')
     two = ui.tab('two', label='Jury', icon='groups')
     three = ui.tab('three', label='Settings', icon='settings')
 
-# Select the first tab
+# Select the first tab, the Court, as default
 tabs.set_value(one)
-
 
 
 with ui.tab_panels(tabs, value=one).classes('w-full'):
@@ -34,14 +42,7 @@ with ui.tab_panels(tabs, value=one).classes('w-full'):
     with ui.tab_panel(three):
         build_settings_tab()
 
-
-
-# Enable dark mode
-dark = ui.dark_mode()
-dark.enable()
-
-ui.page_title("AI Court Simulator")
-
+# The footer
 with ui.footer(fixed=False).classes('bg-transparent justify-center'):
     ui.label('Created by Fil Bezerianos.').classes('text-xs text-gray-500')
     ui.link('GitHub', 'https://github.com/filbezerianos/ai-court-simulator', new_tab=True).classes('text-xs')

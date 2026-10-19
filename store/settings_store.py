@@ -12,15 +12,17 @@ DEFAULTS = {
     "model": "gemma4:e2b",
 }
 
-
+# Read the settings.json and load settings
 def load_settings() -> dict:
     try:
         with open(SETTINGS_FILE, encoding="utf-8") as f:
             return {**DEFAULTS, **json.load(f)}
     except FileNotFoundError:
+
+        # If the file is missing return the default values above
         return dict(DEFAULTS)
 
-
+# Save settings back to settings.json. Use a tmp file in case of an app crash
 def save_settings(settings: dict) -> None:
     fd, tmp_path = tempfile.mkstemp(dir=SETTINGS_FILE.parent, suffix=".tmp")
     with os.fdopen(fd, "w", encoding="utf-8") as f:

@@ -4,11 +4,11 @@ Create a fictional criminal court case involving $topic, set in $setting.
 
 Requirements:
 - The evidence must leave genuine room for both guilt and reasonable doubt.
-- Give the prosecution at least two strong pieces of evidence and the defense at least two credible doubts.
+- Give the prosecution at least two strong pieces of evidence and the defence at least two credible doubts.
 - Every witness and item of evidence must fit the summary. Do not contradict yourself (for example, do not mention a fingerprint in the summary if the evidence list says no prints were found).
 - Choose names from varied cultural backgrounds that suit the setting.
 - The twist must complicate the prosecution's story, not resolve the case.
-- Do not mention the judge, the prosecutor or the defense attorney by name in any field. Refer to them only as "the prosecution" and "the defense". Names for the lawyers and the judge are set elsewhere.
+- Do not mention the judge, the prosecutor or the defence attorney by name in any field. Refer to them only as "the prosecution" and "the defence". Names for the lawyers and the judge are set elsewhere.
 - Do not choose a defendant, witness or other character name that matches: $user_name, $opponent_name, $judge_name.
 
 Fields to fill in:

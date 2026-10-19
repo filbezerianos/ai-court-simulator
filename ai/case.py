@@ -13,6 +13,7 @@ ROOT = Path(__file__).parent.parent
 PROMPT_FILE = ROOT / "prompts" / "case_generate.md"
 TOPICS_FILE = ROOT / "data" / "case_topics.json"
 
+# Max attempts to generate a response from the model
 MAX_ATTEMPTS = 3
 
 
@@ -31,9 +32,15 @@ class Case(BaseModel):
 
 
 # Fill the placeholders of the prompt with a random topic/setting and the names from the settings
-def build_prompt(settings: dict) -> str:
+def build_case_generate_prompt(settings: dict) -> str:
+
+    # Read the topics json file
     topics = json.loads(TOPICS_FILE.read_text(encoding="utf-8"))
+
+    # Read teh template of the prompt
     template = Template(PROMPT_FILE.read_text(encoding="utf-8"))
+
+    # Replace the variables iin the prompt template
     return template.substitute(
         topic=random.choice(topics["topics"]),
         setting=random.choice(topics["settings"]),
@@ -56,9 +63,14 @@ def build_trial(case: Case, settings: dict) -> dict:
     }
 
 
+# Generate a case using AI, e.g. Generate Case button is clicked
 async def generate_case() -> Case:
+
+    # Load the settings
     settings = load_settings()
-    prompt = build_prompt(settings)
+
+    # Build the prompt for the case generation
+    prompt = build_case_generate_prompt(settings)
 
     last_error = None
     for _ in range(MAX_ATTEMPTS):
@@ -69,18 +81,16 @@ async def generate_case() -> Case:
             options={"temperature": 0.9},
         )
         try:
+            # Check the the response is structured correctly
             case = Case.model_validate_json(response.message.content)
         except ValueError as e:  # pydantic's ValidationError is a ValueError
             last_error = e
             continue
+
+        # Save the details of the case in the current_case.json
         save_case(build_trial(case, settings))
         return case
 
     raise RuntimeError(f"Could not generate a valid case: {last_error}")
 
 
-# Quick test without the UI: python -m ai.case_generator
-if __name__ == "__main__":
-    import asyncio
-
-    print(asyncio.run(generate_case()).model_dump_json(indent=2))
