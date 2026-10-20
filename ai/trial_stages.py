@@ -11,13 +11,16 @@ TRIAL_STAGES = [
     # closing_argument and verdict come later
 ]
 
+
 # How each stage is called on the page
+# appears at each chat message
 STAGE_LABELS = {
-    "judge_opening": "judge's opening",
-    "opening_statement": "opening statement",
-    "present_evidence": "presentation of evidence",
-    "judge_instructions": "instructions to the jury",
+    "judge_opening": "Judge's Opening",
+    "opening_statement": "Opening Statement",
+    "present_evidence": "Presentation of Evidence",
+    "judge_instructions": "Instructions to the Jury",
 }
+
 
 # The placeholder of the player's input box for each stage
 STAGE_INPUT_HINTS = {

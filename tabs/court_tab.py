@@ -5,6 +5,21 @@ from ai.judge import judge_opening, generate_judge_statement
 from ai.lawyer import generate_opponent_statement
 from ai.trial_stages import get_next_stage, STAGE_LABELS, STAGE_INPUT_HINTS
 from store.case_store import load_case, clear_case, choose_side, add_entry
+from tabs.deliberation_view import show_jury_deliberation
+
+# Chat bubble colours (Quasar colour names). The player keeps the default bubble.
+JUDGE_BUBBLE_PROPS = 'bg-color=green-7 text-color=white'
+OPPONENT_BUBBLE_PROPS = 'bg-color=red-4 text-color=white'
+
+# Chat icons (Material icon names) for the role of the speaker
+ROLE_ICONS = {'judge': 'account_balance', 'prosecution': 'gavel', 'defence': 'shield'}
+
+
+# Put the icon of the speaker's role in the avatar spot of a chat message
+def add_role_icon(message, role: str, sent: bool = False):
+    margin = 'ml-2' if sent else 'mr-2'
+    with message.add_slot('avatar'):
+        ui.icon(ROLE_ICONS[role], size='lg').classes(f'self-end {margin}')
 
 
 # Generate a new case, Generate Case button is clicked
@@ -15,7 +30,10 @@ async def new_case(button):
     try:
         await generate_case()
     except Exception as e:
-        ui.notify(f'Could not generate the case: {e}', type='negative')
+        ui.notify(
+            f'Could not generate the case: {e}', 
+            type='negative'
+        )
         button.props(remove='loading')
         button.enable()
         return
@@ -31,26 +49,31 @@ def on_choose(side: str):
     court_view.refresh()
 
 
-def case_card(trial: dict):
-    case = trial['case']
+# The confirmation dialog to clear the case and start over. It is opened by the button at
+# the top of the case and by the Start Over button at the end of the trial.
+def create_start_over_dialog():
 
     def confirm_clear():
-        clear_dialog.close()
+        start_over_dialog.close()
         clear_case()
         court_view.refresh()
 
-    # The dialog when the button on the top right to clear the case and start over is clicked
-    with ui.dialog() as clear_dialog, ui.card():
+    with ui.dialog() as start_over_dialog, ui.card():
         ui.label('Start over? The current case and all progress will be deleted.')
         with ui.row():
-            ui.button('Cancel', on_click=clear_dialog.close).props('flat no-caps')
+            ui.button('Cancel', on_click=start_over_dialog.close).props('flat no-caps')
             ui.button('Start Over', on_click=confirm_clear).props('color=negative no-caps')
+    return start_over_dialog
+
+
+def case_card(trial: dict, start_over_dialog):
+    case = trial['case']
 
     with ui.column().classes('w-full gap-2 border rounded-lg p-4 shadow-2xl items-center'):
 
         # The button to clear the case and start over
         with ui.row().classes('w-full'):
-            clear_button = ui.button(icon='delete', on_click=clear_dialog.open).props('flat round dense')
+            clear_button = ui.button(icon='delete', on_click=start_over_dialog.open).props('flat round dense')
             clear_button.tooltip('Start over')
 
         # Title of the case
@@ -116,8 +139,9 @@ async def start_trial_with_judge_opening(button, typing, judge_name: str):
 
     # Show the typing animation while the judge "thinks"
     with typing:
-        with ui.chat_message(name=judge_name):
+        with ui.chat_message(name=judge_name).props(JUDGE_BUBBLE_PROPS) as typing_message:
             ui.spinner('dots', size='2rem')
+        add_role_icon(typing_message, 'judge')
     try:
         await judge_opening()
     except Exception as e:
@@ -130,13 +154,15 @@ async def start_trial_with_judge_opening(button, typing, judge_name: str):
 
 # An AI speaker (the opponent or the judge) speaks, the Continue button is clicked.
 # generate_statement is the function that asks the model for the given stage.
-async def continue_with_ai_statement(continue_button, typing, speaker_name: str, stage: str, generate_statement):
+async def continue_with_ai_statement(continue_button, typing, speaker_name: str, stage: str, generate_statement, bubble_props: str, role: str):
+    
     continue_button.visible = False
 
     # Show the typing animation while the speaker "thinks"
     with typing:
-        with ui.chat_message(name=speaker_name):
+        with ui.chat_message(name=speaker_name).props(bubble_props) as typing_message:
             ui.spinner('dots', size='2rem')
+        add_role_icon(typing_message, role)
     try:
         await generate_statement(stage)
     except Exception as e:
@@ -157,9 +183,13 @@ def submit_player_statement(statement_input, stage: str, player: dict):
 
 
 # Decide who speaks next: the player gets an input box, the AI opponent gets a Continue button
-def show_next_trial_step(trial: dict):
+def show_next_trial_step(trial: dict, start_over_dialog):
+
     next_stage = get_next_stage(trial)
+
+    # All the speeches are done, the jury decides
     if next_stage is None:
+        show_jury_deliberation(trial, court_view.refresh, start_over_dialog.open)
         return
 
     stage = next_stage['stage']
@@ -173,7 +203,8 @@ def show_next_trial_step(trial: dict):
         continue_button = ui.button(
             f'Continue: {judge["name"]} gives the {stage_label}', icon='arrow_forward'
         ).props('no-caps').classes('self-center')
-        continue_button.on_click(lambda: continue_with_ai_statement(continue_button, typing, judge['name'], stage, generate_judge_statement))
+        continue_button.on_click(lambda: continue_with_ai_statement(continue_button, typing, judge['name'], stage, generate_judge_statement, JUDGE_BUBBLE_PROPS, 'judge'))
+    
     elif next_stage['speaker_role'] == player['side']:
         statement_input = ui.textarea(
             label=f'Your {stage_label} ({player["side"]})',
@@ -182,27 +213,36 @@ def show_next_trial_step(trial: dict):
         ).props('outlined autogrow').classes('w-full')
         deliver_statement_button = ui.button('Deliver Statement', icon='send').props('no-caps').classes('self-center')
         deliver_statement_button.on_click(lambda: submit_player_statement(statement_input, stage, player))
+    
     else:
         typing = ui.column().classes('w-full')
         continue_button = ui.button(
             f'Continue: {opponent["name"]} ({opponent["side"]}) gives the {stage_label}', icon='arrow_forward'
         ).props('no-caps').classes('self-center')
-        continue_button.on_click(lambda: continue_with_ai_statement(continue_button, typing, opponent['name'], stage, generate_opponent_statement))
+        continue_button.on_click(lambda: continue_with_ai_statement(continue_button, typing, opponent['name'], stage, generate_opponent_statement, OPPONENT_BUBBLE_PROPS, opponent['side']))
 
 
 # The trial as a chat: one message per transcript entry
-def trial_chat(trial: dict):
+def trial_chat(trial: dict, start_over_dialog):
+
     player_name = trial['cast']['player']['name']
 
     with ui.column().classes('w-full mx-auto gap-1 p-4'):
         for entry in trial['transcript']:
             paragraphs = [p for p in entry['text'].split('\n') if p.strip()]
-            ui.chat_message(
+            sent = entry['speaker'] == player_name
+            message = ui.chat_message(
                 paragraphs,
                 name=entry['speaker'],
                 stamp=STAGE_LABELS[entry['stage']],
-                sent=entry['speaker'] == player_name,
+                sent=sent,
             )
+            add_role_icon(message, entry['role'], sent)
+            # Colour by who is speaking, the player keeps the default bubble
+            if entry['role'] == 'judge':
+                message.props(JUDGE_BUBBLE_PROPS)
+            elif entry['speaker'] != player_name:
+                message.props(OPPONENT_BUBBLE_PROPS)
 
         # For the first chat, transcript not created yet, the judge is doing the opening
         if not trial['transcript']:
@@ -210,7 +250,7 @@ def trial_chat(trial: dict):
             start_trial_button = ui.button('Start Trial', icon='play_arrow').props('no-caps').classes('self-center')
             start_trial_button.on_click(lambda: start_trial_with_judge_opening(start_trial_button, typing, trial['cast']['judge']['name']))
         else:
-            show_next_trial_step(trial)
+            show_next_trial_step(trial, start_over_dialog)
 
 
 # Redrawn with court_view.refresh() after the case changes
@@ -227,12 +267,13 @@ def court_view():
             generate_case_button = ui.button('Generate Case', icon='auto_awesome').props('no-caps')
             generate_case_button.on_click(lambda: new_case(generate_case_button))
     else:
-        # If there is a current case already show it
-        case_card(trial)
+        # If there is a current case already, then show it
+        start_over_dialog = create_start_over_dialog()
+        case_card(trial, start_over_dialog)
 
         # The trial starts once the player has chosen a side
         if trial['cast']['player']['side'] is not None:
-            trial_chat(trial)
+            trial_chat(trial, start_over_dialog)
 
 
 def build_court_tab():

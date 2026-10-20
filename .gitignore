@@ -222,3 +222,4 @@ __marimo__/
 # AI Court Simulator
 .nicegui/
 data/*.tmp
+data/saved_cases/*

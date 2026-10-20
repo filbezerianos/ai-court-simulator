@@ -12,17 +12,20 @@ def load_prompt(name: str, **values) -> str:
     return template.substitute(**values)
 
 
-# Ask the model from the settings and return its text answer
-async def ask(prompt: str, system: str | None = None, temperature: float = 0.7) -> str:
+# Ask the model from the settings and return its text answer.
+# With response_schema (a JSON schema) the answer is forced to be JSON in that shape.
+async def ask(prompt: str, system: str | None = None, temperature: float = 0.7, response_schema: dict | None = None) -> str:
     messages = []
     if system:
         messages.append({"role": "system", "content": system})
     messages.append({"role": "user", "content": prompt})
 
+    extra_arguments = {"format": response_schema} if response_schema else {}
     response = await AsyncClient().chat(
         model=load_settings()["model"],
         messages=messages,
         options={"temperature": temperature},
+        **extra_arguments,
     )
     return response.message.content.strip()
 

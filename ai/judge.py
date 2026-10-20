@@ -2,7 +2,7 @@ from ai.llm import ask, load_prompt, format_transcript_for_prompt
 from store.case_store import load_case, add_entry
 
 # The verdict rule the judge explains to the jury
-VERDICT_RULE = "unanimous, agreed by all twelve jurors"
+VERDICT_RULE = "decided by the majority of the twelve jurors"
 
 # The prompt of each judge stage is prompts/<stage>.md
 JUDGE_WORD_COUNTS = {"judge_opening": 200, "judge_instructions": 300}
