@@ -37,10 +37,10 @@ def build_case_generate_prompt(settings: dict) -> str:
     # Read the topics json file
     topics = json.loads(TOPICS_FILE.read_text(encoding="utf-8"))
 
-    # Read teh template of the prompt
+    # Read the template of the prompt
     template = Template(PROMPT_FILE.read_text(encoding="utf-8"))
 
-    # Replace the variables iin the prompt template
+    # Replace the variables in the prompt template
     return template.substitute(
         topic=random.choice(topics["topics"]),
         setting=random.choice(topics["settings"]),
