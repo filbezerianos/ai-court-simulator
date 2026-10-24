@@ -223,3 +223,6 @@ __marimo__/
 .nicegui/
 data/*.tmp
 data/saved_cases/*
+data/current_case.json
+data/jury.json
+data/settings.json
