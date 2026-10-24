@@ -1,5 +1,4 @@
 from nicegui import ui
-
 from store.jury_store import load_jury, save_jury, reset_jury
 
 
@@ -53,6 +52,7 @@ def make_card(juror: dict, jurors: list[dict]):
         button.on_click(toggle)
 
 
+# Create the grid with the cards for all jurors
 def build_jury_tab():
     # Load the jurors details from the json file
     jurors = load_jury()
@@ -66,10 +66,10 @@ def build_jury_tab():
     def confirm_reset():
         jurors[:] = reset_jury()      # keep the same list object
         jury_grid.refresh()
-        ui.notify('Jury reset to defaults')
+        ui.notify('Jury configuration reset to defaults.', type='info')
 
     with ui.dialog() as dialog, ui.card():
-        ui.label('Reset all jurors to their defaults? Your changes will be lost.')
+        ui.label(f'Reset all jurors to their defaults? Your current jury configuration will be lost.')
         with ui.row():
             ui.button('Cancel', on_click=dialog.close).props('flat no-caps')
             ui.button('Reset', on_click=lambda: (confirm_reset(), dialog.close())).props('color=negative no-caps')

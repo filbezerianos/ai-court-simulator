@@ -17,8 +17,8 @@ def show_vote(vote: dict):
     with ui.row().classes(f'items-center no-wrap gap-2 px-3 py-1 rounded-md border {style}'):
         ui.icon(icon, size='xs')
         ui.label(vote['decision'].upper()).classes('text-xs font-bold tracking-wide')
-    with ui.expansion('Rationale', icon='chat_bubble_outline').classes('w-full text-sm'):
-        ui.label(vote['rationale']).classes('text-gray-300')
+    with ui.expansion('Rationale', icon='info').classes('w-full text-sm'):
+        ui.label(vote['rationale']).classes('text-gray')
 
 
 # The card of one juror: the name, then the dots while the juror decides, or the vote when it is known.
@@ -29,7 +29,7 @@ def show_juror_card(juror_name: str, vote: dict | None = None):
         status = ui.column().classes('w-full gap-1')
         with status:
             if vote is None:
-                ui.spinner('dots', size='2rem')
+                ui.spinner('dots', size='2rem', color='white')
             else:
                 show_vote(vote)
     return status
@@ -46,19 +46,19 @@ def show_verdict_banner(round_result: dict, player_side: str):
             ui.label(f'{score}. The jury has to decide again.').classes('text-gray-300')
             return
 
-        verdict_colour = 'text-red-400' if result == 'guilty' else 'text-green-400'
+        verdict_colour = 'text-red' if result == 'guilty' else 'text-green'
         ui.label(f'VERDICT: {result.upper()}').classes(f'text-3xl font-bold {verdict_colour}')
         ui.label(score).classes('text-gray-300')
         if did_player_win(player_side, result):
-            ui.label(f'You won the case as the {player_side}!').classes('text-xl font-bold text-green-400 mt-2')
+            ui.label(f'You won the case as the {player_side}!').classes('text-xl font-bold text-green mt-2')
         else:
-            ui.label(f'You lost the case as the {player_side}.').classes('text-xl font-bold text-red-400 mt-2')
+            ui.label(f'You lost the case as the {player_side}.').classes('text-xl font-bold text-red mt-2')
 
 
 # The saved result of a round: the 12 jurors with their decisions, then the verdict
 def show_round_result(round_result: dict, round_number: int, player_side: str):
     if round_number > 1:
-        ui.label(f'Round {round_number}').classes('text-xs tracking-widest text-gray-500 font-semibold')
+        ui.label(f'Round {round_number}').classes('text-xs tracking-widest text-gray font-semibold')
     with ui.grid(columns=3).classes('w-full gap-4'):
         for vote in round_result['votes']:
             show_juror_card(vote['name'], vote)
@@ -73,7 +73,9 @@ async def run_deliberation_on_page(button, board, refresh_court):
 
     statuses = {}
     with board:
-        ui.label('The jury is deliberating...').classes('text-gray-400')
+        ui.notification('The jury is deliberating. Please wait...', type='info')
+        ui.separator()
+        ui.label('The jury is deliberating...').classes('text-gray')
         with ui.grid(columns=3).classes('w-full gap-4'):
             for juror in load_jury():
                 statuses[juror['id']] = show_juror_card(juror['name'])
@@ -113,7 +115,7 @@ def show_jury_deliberation(trial: dict, refresh_court, open_start_over_dialog):
     # The jurors have not decided yet, or they were tied 6 - 6
     if last_round is None or last_round['result'] == 'tie':
         button_text = 'Start Deliberation' if last_round is None else 'Run Jury Decisions Again'
-        deliberation_button = ui.button(button_text, icon='groups').props('no-caps').classes('self-center')
+        deliberation_button = ui.button(button_text).props('no-caps').classes('self-center')
         deliberation_button.on_click(lambda: run_deliberation_on_page(deliberation_button, board, refresh_court))
 
     # The final verdict is shown: the player can keep the case or start over from here

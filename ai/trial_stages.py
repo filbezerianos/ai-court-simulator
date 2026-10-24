@@ -24,7 +24,7 @@ STAGE_LABELS = {
 
 # The placeholder of the player's input box for each stage
 STAGE_INPUT_HINTS = {
-    "opening_statement": "Address the court and the jury. Introduce your theory of the case...",
+    "opening_statement": "Address the court and the jury. Introduce your theory of the case, outline key facts...",
     "present_evidence": "Walk the jury through your evidence (E1, E2...) and witnesses, and explain what each shows...",
 }
 

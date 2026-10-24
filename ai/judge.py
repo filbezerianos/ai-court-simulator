@@ -8,6 +8,13 @@ VERDICT_RULE = "decided by the majority of the twelve jurors"
 JUDGE_WORD_COUNTS = {"judge_opening": 200, "judge_instructions": 300}
 
 
+# The name of the attorney who has the given side ("prosecution" or "defence")
+def get_attorney_name(trial: dict, side: str) -> str:
+    for person in (trial["cast"]["player"], trial["cast"]["opponent"]):
+        if person["side"] == side:
+            return person["name"]
+
+
 # The judge speaks at the given stage. The speech is saved in the transcript and returned.
 async def generate_judge_statement(stage: str) -> str:
     trial = load_case()
@@ -21,6 +28,8 @@ async def generate_judge_statement(stage: str) -> str:
         case_title=case["title"],
         charge=case["charge"],
         defendant=case["defendant"],
+        prosecution=get_attorney_name(trial, "prosecution"),
+        defence=get_attorney_name(trial, "defence"),
         transcript=format_transcript_for_prompt(trial),
         verdict_rule=VERDICT_RULE,
         word_count=JUDGE_WORD_COUNTS[stage],

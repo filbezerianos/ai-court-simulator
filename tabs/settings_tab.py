@@ -1,5 +1,4 @@
 from nicegui import ui
-
 from store.settings_store import load_settings, save_settings
 
 
@@ -8,7 +7,7 @@ def build_settings_tab():
     settings = load_settings()
 
     with ui.card().classes('w-96'):
-        ui.label('Name Settings').classes('text-h6')
+        ui.label('Name Settings').classes('text-h6 text-primary')
         user_input = ui.input(label='Your Name', validation={'At least 3 characters': lambda v: len((v or '').strip()) >= 3}).classes('w-full').bind_value(settings, 'user_name')
         opponent_input = ui.input(label='Opponent Attorney Name', validation={'At least 3 characters': lambda v: len((v or '').strip()) >= 3}).classes('w-full').bind_value(settings, 'opponent_name')
         judge_input = ui.input(label='Judge Name', validation={'At least 3 characters': lambda v: len((v or '').strip()) >= 3}).classes('w-full').bind_value(settings, 'judge_name')
@@ -21,6 +20,6 @@ def build_settings_tab():
             settings['opponent_name'] = settings['opponent_name'].strip()
             settings['judge_name'] = settings['judge_name'].strip()
             save_settings(settings)
-            ui.notify('Name Settings saved')
+            ui.notify('Name Settings Saved', type='info')
 
         ui.button('Save', icon='save', on_click=on_save)

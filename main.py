@@ -1,5 +1,6 @@
 from nicegui import ui
 from pathlib import Path
+from theme import apply_theme
 from tabs.court_tab import build_court_tab
 from tabs.jury_tab import build_jury_tab
 from tabs.settings_tab import build_settings_tab
@@ -9,6 +10,9 @@ from tabs.settings_tab import build_settings_tab
 dark = ui.dark_mode()
 dark.enable()
 
+# Set the colours for the app
+apply_theme()
+
 # Set the title of the page
 ui.page_title("AI Court Simulator")
 
@@ -16,14 +20,14 @@ ui.page_title("AI Court Simulator")
 # The title at the top
 with ui.row().classes('w-full'):
     with ui.column().classes('w-full items-center text-center gap-0'):
-        ui.icon('account_balance', size='md').classes('text-blue')
-        ui.markdown('### AI Court Simulator').classes('text-blue')
+        ui.icon('account_balance', size='md').classes('text-accent')
+        ui.markdown('### AI Court Simulator').classes('text-accent')
         ui.markdown('###### An AI-powered courtroom drama.')
 
 ui.separator()
 
 # Define the tabs
-with ui.tabs().props('active-color=blue indicator-color=blue no-caps').classes('w-full') as tabs:
+with ui.tabs().props('active-color=primary indicator-color=primary no-caps').classes('w-full') as tabs:
     one = ui.tab('one', label='Courtroom', icon='gavel')
     two = ui.tab('two', label='Jury', icon='groups')
     three = ui.tab('three', label='Settings', icon='settings')
