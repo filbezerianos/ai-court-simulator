@@ -12,9 +12,9 @@ def load_prompt(name: str, **values) -> str:
     return template.substitute(**values)
 
 
-# Ask the model from the settings and return its text answer.
+# Ask a model and return its text answer. Without model, the model from the settings is used.
 # With response_schema (a JSON schema) the answer is forced to be JSON in that shape.
-async def ask(prompt: str, system: str | None = None, temperature: float = 0.7, response_schema: dict | None = None) -> str:
+async def ask(prompt: str, system: str | None = None, temperature: float = 0.7, response_schema: dict | None = None, model: str | None = None) -> str:
     messages = []
     if system:
         messages.append({"role": "system", "content": system})
@@ -22,7 +22,7 @@ async def ask(prompt: str, system: str | None = None, temperature: float = 0.7, 
 
     extra_arguments = {"format": response_schema} if response_schema else {}
     response = await AsyncClient().chat(
-        model=load_settings()["model"],
+        model=model or load_settings()["model"],
         messages=messages,
         options={"temperature": temperature},
         **extra_arguments,

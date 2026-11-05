@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from ai.llm import ask, load_prompt, format_transcript_for_prompt
 from store.case_store import load_case, add_verdict_round
 from store.jury_store import load_jury
+from store.settings_store import load_settings
 
 MAX_ATTEMPTS = 3
 
@@ -25,10 +26,17 @@ def get_judge_instructions(trial: dict) -> str:
     return "(the judge gave no instructions)"
 
 
-# One juror decides, based on the trial and on who the juror is (age, occupation, bias).
-# Returns {"juror_id", "name", "decision", "rationale"}.
+# The model of a juror: the juror picks model 1 or 2, the names are in the settings
+def get_juror_model(juror: dict) -> str:
+    return load_settings()[f"juror_model_{juror.get('model_slot', 1)}"]
+
+
+# One juror decides, based on the trial and on who the juror is (age, occupation, bias),
+# using the model chosen for the juror.
+# Returns {"juror_id", "name", "model", "decision", "rationale"}.
 async def get_juror_vote(juror: dict, trial: dict) -> dict:
     case = trial["case"]
+    model = get_juror_model(juror)
 
     bias_line = f"Your personal outlook: {juror['bias']}" if juror.get("bias") else ""
     system_prompt = load_prompt(
@@ -53,6 +61,7 @@ async def get_juror_vote(juror: dict, trial: dict) -> dict:
             system=system_prompt,
             temperature=0.8,
             response_schema=JurorVote.model_json_schema(),
+            model=model,
         )
         try:
             vote = JurorVote.model_validate_json(answer)
@@ -61,11 +70,12 @@ async def get_juror_vote(juror: dict, trial: dict) -> dict:
         return {
             "juror_id": juror["id"],
             "name": juror["name"],
+            "model": model,
             "decision": vote.decision,
             "rationale": vote.rationale.strip(),
         }
 
-    raise RuntimeError(f"{juror['name']} could not reach a decision")
+    raise RuntimeError(f"{juror['name']} could not reach a decision with {model}")
 
 
 # Count the votes. The result is "guilty", "not guilty" or "tie" (6 against 6).

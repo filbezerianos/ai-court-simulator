@@ -17,6 +17,9 @@ def show_vote(vote: dict):
     with ui.row().classes(f'items-center no-wrap gap-2 px-3 py-1 rounded-md border {style}'):
         ui.icon(icon, size='xs')
         ui.label(vote['decision'].upper()).classes('text-xs font-bold tracking-wide')
+    # The model that decided (rounds saved before the juror models existed have none)
+    if vote.get('model'):
+        ui.label(vote['model']).classes('text-xs text-gray-500')
     with ui.expansion('Rationale', icon='info').classes('w-full text-sm'):
         ui.label(vote['rationale']).classes('text-gray')
 

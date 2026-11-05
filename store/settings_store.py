@@ -10,6 +10,9 @@ DEFAULTS = {
     "judge_name": "Judge Eleanor Whitmore-Hayes",
     "opponent_name": "Jordan Ellis",
     "model": "gemma4:e2b",
+    "opponent_model": "gemma4:e2b",
+    "juror_model_1": "gemma4:e2b",
+    "juror_model_2": "gemma4:e4b",
 }
 
 # Read the settings.json and load settings

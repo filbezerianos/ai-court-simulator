@@ -1,5 +1,6 @@
 from ai.llm import ask, load_prompt, format_transcript_for_prompt
 from store.case_store import load_case, add_entry
+from store.settings_store import load_settings
 
 SIDE_TITLES = {"prosecution": "prosecuting attorney", "defence": "defence attorney"}
 
@@ -49,6 +50,6 @@ async def generate_opponent_statement(stage: str) -> str:
         word_count=STATEMENT_WORD_COUNTS[stage],
     )
 
-    text = await ask(task_prompt, system=system_prompt)
+    text = await ask(task_prompt, system=system_prompt, model=load_settings()["opponent_model"])
     add_entry(opponent["name"], side, stage, text)
     return text

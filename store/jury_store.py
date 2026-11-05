@@ -10,9 +10,16 @@ JURY_FILE = Path(__file__).parent.parent / "data" / "jury.json"
 DEFAULT_JURY_FILE = Path(__file__).parent.parent / "data" / "jury_default.json"
 
 
+# Every juror uses one of the two juror models of the settings (1 or 2). Jurors without one use model 1.
+def add_missing_model_slot(jurors: list[dict]) -> list[dict]:
+    for juror in jurors:
+        juror.setdefault("model_slot", 1)
+    return jurors
+
+
 def load_jury() -> list[dict]:
     with open(JURY_FILE, encoding="utf-8") as f:
-        return json.load(f)["jurors"]
+        return add_missing_model_slot(json.load(f)["jurors"])
 
 
 # Write to a temp file first in case of an app crash
@@ -26,6 +33,6 @@ def save_jury(jurors: list[dict]) -> None:
 # Overwrite the jurors with the defaults and return them
 def reset_jury() -> list[dict]:
     with open(DEFAULT_JURY_FILE, encoding="utf-8") as f:
-        jurors = json.load(f)["jurors"]
+        jurors = add_missing_model_slot(json.load(f)["jurors"])
     save_jury(jurors)
     return jurors

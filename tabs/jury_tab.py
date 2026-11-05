@@ -1,9 +1,10 @@
 from nicegui import ui
 from store.jury_store import load_jury, save_jury, reset_jury
+from store.settings_store import load_settings
 
 
-# Make the card for one juror
-def make_card(juror: dict, jurors: list[dict]):
+# Make the card for one juror. model_options maps the model slot (1 or 2) to the model name.
+def make_card(juror: dict, jurors: list[dict], model_options: dict):
 
     with ui.card().classes('w-full'):
     
@@ -13,6 +14,7 @@ def make_card(juror: dict, jurors: list[dict]):
 
         occupation = ui.input(label='Occupation', validation={'At least 5 characters': lambda v: len((v or '').strip()) >= 5}).bind_value(juror, 'occupation').props('borderless dense readonly autogrow').classes('w-full')
         age = ui.number(label='Age', validation={'Between 18 and 75': lambda v: v is not None and 18 <= v <= 75}).bind_value(juror, 'age').props('borderless dense readonly').classes('w-full')
+        model = ui.select(model_options, label='Model').bind_value(juror, 'model_slot').props('borderless dense readonly').classes('w-full')
         bias = ui.textarea(label='Personality/Bias (Optional)',
                            placeholder='e.g. "Deeply distrusts authority figures"').bind_value(juror, 'bias').props('borderless dense readonly autogrow').classes('w-full')
 
@@ -21,6 +23,7 @@ def make_card(juror: dict, jurors: list[dict]):
             name: 'maxlength=50 counter',
             occupation: 'maxlength=100 counter',
             age: 'hint="Between 18 and 75"',
+            model: '',
             bias: 'maxlength=200 counter',
         }
         editing = False
@@ -57,11 +60,15 @@ def build_jury_tab():
     # Load the jurors details from the json file
     jurors = load_jury()
 
+    # The two juror models from the settings, a juror picks one of them
+    settings = load_settings()
+    model_options = {1: settings['juror_model_1'], 2: settings['juror_model_2']}
+
     @ui.refreshable
     def jury_grid():
         with ui.grid(columns=4).classes('w-full gap-4'):
             for juror in jurors:
-                make_card(juror, jurors)
+                make_card(juror, jurors, model_options)
 
     def confirm_reset():
         jurors[:] = reset_jury()      # keep the same list object
