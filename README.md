@@ -1,6 +1,6 @@
 # AI Court Simulator
 
-A courtroom drama game where you play the lawyer and everyone else is an AI. A judge, an opposing attorney and a jury of twelve are all played by a language model running locally on your own machine, so there are no accounts, no API keys and no usage costs.
+A courtroom drama game where you play the lawyer and everyone else is an AI. A judge, an opposing attorney and a jury of twelve are all played by language models running locally on your own machine, so there are no accounts, no API keys and no usage costs. You can even give the opposing attorney and the jurors different models, so the people in the room do not all think alike.
 
 You are handed a freshly generated fictional criminal case, choose to prosecute or defend, argue it in front of the court, and wait for the jury to decide.
 
@@ -13,22 +13,23 @@ You are handed a freshly generated fictional criminal case, choose to prosecute 
 1. **Generate a case.** The model invents a case from a random topic and setting: a title, a charge, a defendant, a summary, a twist, evidence and witnesses. Every case is written to leave room for both guilt and reasonable doubt.
 2. **Choose your side.** Prosecution or defence. The AI opponent takes the other side.
 3. **Argue the trial.** The judge opens the court. You and your opponent then give opening statements and present your evidence, taking turns by side. You write your own statements. The opponent and the judge respond in character, and each one sees everything said so far.
-4. **Hear the verdict.** The judge instructs the jury, and then twelve jurors vote independently. Each one has a name, age and occupation, and gives a written rationale for their decision. A majority decides. A 6-6 tie is a hung jury and the jurors vote again.
+4. **Hear the verdict.** The judge instructs the jury, and then twelve jurors vote independently. Each one has a name, age and occupation, and gives a written rationale for their decision. Each juror uses one of two models, so a single trial can mix, for example, a fast small model and a larger reasoning model on the same jury. A majority decides. A 6-6 tie is a hung jury and the jurors vote again.
 5. **Keep or restart.** Save the finished case as a JSON file, or start over with a new one.
 
-You can edit the jurors (name, age, occupation and an optional personality or bias) in the **Jury** tab, and the names of you, your opponent and the judge in the **Settings** tab. A juror who "deeply distrusts authority figures" makes for a very different trial.
+You can edit the jurors (name, age, occupation, an optional personality or bias, and which of the two juror models they use) in the **Jury** tab. In the **Settings** tab you can change the names of you, your opponent and the judge, and choose the models for the opposing attorney and the jurors. A juror who "deeply distrusts authority figures" makes for a very different trial, and so does a jury split across two models.
 
 ## Requirements
 
 - **Python 3.10 or newer**
-- **[Ollama](https://ollama.com)**, installed and running. It runs the language model on your computer.
-- A model pulled into Ollama. The default is `gemma4:e2b`:
+- **[Ollama](https://ollama.com)**, installed and running. It runs the language models on your computer.
+- One or more models pulled into Ollama. The defaults are `gemma4:e2b` and `deepseek-r1:8b`:
 
   ```bash
   ollama pull gemma4:e2b
+  ollama pull deepseek-r1:8b
   ```
 
-  A model that supports structured (JSON) output is required. Larger models write better arguments and more convincing juries, but are slower. Twelve jurors vote at the same time, so expect a pause at the verdict.
+  Every model you use must support structured (JSON) output. You can use a single model everywhere if you prefer. Larger models write better arguments and more convincing juries, but are slower, and a game that uses two models needs both pulled. Twelve jurors vote at the same time, so expect a pause at the verdict.
 
 ## Getting started
 
@@ -45,7 +46,13 @@ python main.py
 
 The app opens in your browser (by default at http://localhost:8080). Make sure Ollama is running before you generate a case.
 
-To use another model, change the `model` value in `data/settings.json` to the name of any model you have pulled.
+You choose the models in the **Settings** tab, or in `data/settings.json`. Use the name of any model you have pulled:
+
+| Setting | Used for |
+|---|---|
+| `model` | Generating the case and the judge |
+| `opponent_model` | The opposing attorney |
+| `juror_model_1`, `juror_model_2` | The two models available to jurors. Each juror picks one in the **Jury** tab, and defaults to model 1. |
 
 ## Project structure
 
@@ -70,13 +77,14 @@ The prompts live in `prompts/` as ordinary markdown files, so you can change how
 ## Notes
 
 - This is a **local, single-player app**. It has no login and keeps one game at a time in `data/current_case.json`, so don't expose it to the internet.
-- All cases, people and events are fictional and generated by an AI. The jury is an entertainment device, not legal advice, and the quality of the arguments depends on the model you use.
+- All cases, people and events are fictional and generated by an AI. The jury is an entertainment device, not legal advice, and the quality of the arguments depends on the models you use.
+- Using several models at once can take more memory and time, especially at the verdict.
 - The trial currently runs through the opening statements, the evidence and the jury instructions, and then goes straight to the jury. Closing arguments are not in yet.
 - Saved cases are written to `data/saved_cases/` and are ignored by git.
 
 ## Built with
 
-[NiceGUI](https://nicegui.io) for the interface, [Ollama](https://ollama.com) for running the model locally, and [Pydantic](https://docs.pydantic.dev) to validate the model's structured answers.
+[NiceGUI](https://nicegui.io) for the interface, [Ollama](https://ollama.com) for running the models locally, and [Pydantic](https://docs.pydantic.dev) to validate the models' structured answers.
 
 ## Licence
 
